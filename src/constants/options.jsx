@@ -15,17 +15,25 @@ export const SelectTravelersList = [
     },
     {
         id: 3,
-        title: 'Family',
+        title: 'Family(Nuclear)',
         desc: 'A group of fun-loving adventurers',
         icon: '👨‍👩‍👧‍👦',  // Family emoji
         people: '3-5 People',
     },
     {
         id: 4,
-        title: 'Friends',
+        title: 'Family & Friends(5-10 people)',
         desc: 'A bunch of thrill-seekers',
         icon: '👥',  // Friends emoji (multiple people)
         people: '5-10 people',
+    },
+    {
+        id: 5,
+        title: 'More than 10 people',
+        desc: 'Adventure awaits! An unforgettable journey!',
+        icon: '🧑🏻‍🤝‍🧑🏻',  // Friends emoji (multiple people)
+        people: '5-10 people',
+
     }
 ];
 
