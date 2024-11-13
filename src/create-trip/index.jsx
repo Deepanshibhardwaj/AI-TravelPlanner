@@ -11,7 +11,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import { FcGoogle } from "react-icons/fc";
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 function CreateTrip() {
   const [place, setPlace] = useState(null);
@@ -28,18 +32,26 @@ function CreateTrip() {
   useEffect(() => {
     console.log(formData);
   }, [formData]);
+  
+  const login = useGoogleLogin({
+    onSuccess: (codeResp) => GetUserProfile(codeResp),
+     
+    onError: (error) => {
+      console.log(error);
+      // Handle error on login
+    }
+  });
 
   const OnGenerateTrip = async () => {
     const user = localStorage.getItem('user');
 
     if (!user) {
-      setOpenDialog(true); // Open dialog immediately
+      setOpenDialog(true);
       return;
     }
 
-    // Proceed with validations and API call after dialog state update
     if (!formData?.location || !formData?.budget || !formData.traveler) {
-      setOpenDialog(true); // Open dialog for missing details, if needed
+      setOpenDialog(true);
       return;
     }
 
@@ -58,6 +70,22 @@ function CreateTrip() {
     }
   };
 
+  const GetUserProfile=async(tokenInfo)=>{
+    axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?acess_token=${tokenInfo?.access_token}`,{
+      headers:{
+        Authorization:`Bearer ${tokenInfo?.access_token}`,
+        Accept:'Application/json'
+      }
+    }).then ((resp)=>{
+
+      console.log(resp);
+      localStorage.setItem('user',JSON.stringify(resp.data));
+      setOpenDialog(false);
+
+      OnGenerateTrip();
+    })
+
+  }
   return (
     <div className='sm:px-10 md:px-32 lg:px-56 xl:px-10 px-5 mt-10'>
       <Toaster position="bottom-right" />
@@ -163,13 +191,26 @@ function CreateTrip() {
         </Button>
       </div>
 
-      {/* Dialog for Missing Information or No User */}
+      {/* Styled Dialog */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent>
+        <DialogContent
+          style={{
+            backgroundColor: 'black',
+            border: '2px solid blue',
+            borderRadius: '8px',
+            color: 'white',
+            padding: '24px',
+          }}
+        >
           <DialogHeader>
-            <DialogTitle>Account Required</DialogTitle>
-            <DialogDescription>
+            <DialogTitle style={{ color: 'white' }}>Sign in with Google</DialogTitle>
+            <DialogDescription style={{ color: 'white' }}>
               You must be logged in to generate a trip itinerary. Please log in to continue.
+              <Button 
+                onClick={login}
+                className="w-full mt-1 flex items-center justify-center">
+                <FcGoogle className="mr-2 h-7 w-7" />Sign In
+              </Button>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
