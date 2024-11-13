@@ -32,10 +32,9 @@ function CreateTrip() {
   useEffect(() => {
     console.log(formData);
   }, [formData]);
-  
+
   const login = useGoogleLogin({
     onSuccess: (codeResp) => GetUserProfile(codeResp),
-     
     onError: (error) => {
       console.log(error);
       // Handle error on login
@@ -45,6 +44,7 @@ function CreateTrip() {
   const OnGenerateTrip = async () => {
     const user = localStorage.getItem('user');
 
+    // Trigger login if user is not logged in
     if (!user) {
       setOpenDialog(true);
       return;
@@ -70,22 +70,24 @@ function CreateTrip() {
     }
   };
 
-  const GetUserProfile=async(tokenInfo)=>{
-    axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?acess_token=${tokenInfo?.access_token}`,{
-      headers:{
-        Authorization:`Bearer ${tokenInfo?.access_token}`,
-        Accept:'Application/json'
-      }
-    }).then ((resp)=>{
+  const GetUserProfile = async (tokenInfo) => {
+    try {
+      const response = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`, {
+        headers: {
+          Authorization: `Bearer ${tokenInfo?.access_token}`,
+          Accept: 'Application/json',
+        }
+      });
+      
+      console.log(response);
+      localStorage.setItem('user', JSON.stringify(response.data));
+      setOpenDialog(false); // Close dialog after successful login
+      OnGenerateTrip(); // Proceed with trip generation
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
-      console.log(resp);
-      localStorage.setItem('user',JSON.stringify(resp.data));
-      setOpenDialog(false);
-
-      OnGenerateTrip();
-    })
-
-  }
   return (
     <div className='sm:px-10 md:px-32 lg:px-56 xl:px-10 px-5 mt-10'>
       <Toaster position="bottom-right" />
@@ -102,9 +104,9 @@ function CreateTrip() {
           apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
           selectProps={{
             value: place,
-            onChange: (v) => { 
-              setPlace(v); 
-              handleInputChange('location', v); 
+            onChange: (v) => {
+              setPlace(v);
+              handleInputChange('location', v);
             },
             isClearable: true,
             styles: {
@@ -206,7 +208,7 @@ function CreateTrip() {
             <DialogTitle style={{ color: 'white' }}>Sign in with Google</DialogTitle>
             <DialogDescription style={{ color: 'white' }}>
               You must be logged in to generate a trip itinerary. Please log in to continue.
-              <Button 
+              <Button
                 onClick={login}
                 className="w-full mt-1 flex items-center justify-center">
                 <FcGoogle className="mr-2 h-7 w-7" />Sign In
