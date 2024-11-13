@@ -6,6 +6,7 @@ import CreateTrip from './create-trip/index.jsx'; // Correct import path
 import Header from './components/custom/Header.jsx'; // Import the Header component (assuming the path is correct)
 import './index.css'; // Correct order of imports
 import { Toaster } from 'sonner';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 
 // Define the routes
@@ -23,9 +24,10 @@ const router = createBrowserRouter([
 // Render the application
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_AUTH_CLIENT_ID}>
     <Header /> 
   <Toaster/>
-
-    <RouterProvider router={router} />
+   <RouterProvider router={router} />
+   </GoogleOAuthProvider>
   </StrictMode>
 );

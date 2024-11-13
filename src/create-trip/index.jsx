@@ -1,13 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import { Input } from '../components/ui/input';
-import { SelectBudgetOptions, SelectTravelersList } from '@/constants/options';
+import { AI_Prompt, SelectBudgetOptions, SelectTravelersList } from '@/constants/options';
 import { Button } from '@/components/ui/button';
-import { Toaster, toast } from 'sonner';
+import { Toaster } from 'sonner';
+import { chatSession } from '@/service/AIModal';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function CreateTrip() {
   const [place, setPlace] = useState(null);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
 
   const handleInputChange = (name, value) => {
     setFormData((prevFormData) => ({
@@ -20,24 +29,37 @@ function CreateTrip() {
     console.log(formData);
   }, [formData]);
 
-  const OnGenerateTrip = () => {
-    if (!formData?.location || !formData?.budget || !formData.traveler) {
-      toast.error("Please fill all the details.", {
-        style: {
-          backgroundColor: '#333',
-          color: '#fff',
-          borderRadius: '8px',
-          padding: '16px',
-        },
-      });
+  const OnGenerateTrip = async () => {
+    const user = localStorage.getItem('user');
+
+    if (!user) {
+      setOpenDialog(true); // Open dialog immediately
       return;
     }
-    console.log('Generating trip with the following data:', formData);
+
+    // Proceed with validations and API call after dialog state update
+    if (!formData?.location || !formData?.budget || !formData.traveler) {
+      setOpenDialog(true); // Open dialog for missing details, if needed
+      return;
+    }
+
+    const FINAL_PROMPT = AI_Prompt
+      .replace('{location}', formData?.location?.label)
+      .replace('{totalDays}', formData?.noofdays)
+      .replace('{traveler}', formData?.traveler)
+      .replace('{budget}', formData?.budget)
+      .replace('{totalDays}', formData?.noofdays);
+
+    try {
+      const result = await chatSession.sendMessage(FINAL_PROMPT);
+      console.log(result?.response?.text());
+    } catch (error) {
+      console.error("Error generating trip:", error);
+    }
   };
 
   return (
     <div className='sm:px-10 md:px-32 lg:px-56 xl:px-10 px-5 mt-10'>
-      {/* Toaster component for notifications at bottom-right */}
       <Toaster position="bottom-right" />
 
       <h2 className='font-bold text-3xl'>Tell us your Travel Preferences🗺️🏕️</h2>
@@ -140,6 +162,18 @@ function CreateTrip() {
           Generate Trip
         </Button>
       </div>
+
+      {/* Dialog for Missing Information or No User */}
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Account Required</DialogTitle>
+            <DialogDescription>
+              You must be logged in to generate a trip itinerary. Please log in to continue.
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
