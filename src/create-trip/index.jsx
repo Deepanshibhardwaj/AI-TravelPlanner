@@ -16,11 +16,16 @@ import {
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { setDoc, doc } from 'firebase/firestore';
+
+import { db } from '@/service/firebaseConfig';
 
 function CreateTrip() {
   const [place, setPlace] = useState(null);
   const [formData, setFormData] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (name, value) => {
     setFormData((prevFormData) => ({
@@ -42,7 +47,7 @@ function CreateTrip() {
   });
 
   const OnGenerateTrip = async () => {
-    const user = localStorage.getItem('user');
+    const user = JSON.parse(localStorage.getItem('user'));
 
     // Trigger login if user is not logged in
     if (!user) {
@@ -54,6 +59,7 @@ function CreateTrip() {
       setOpenDialog(true);
       return;
     }
+    setLoading(true);
 
     const FINAL_PROMPT = AI_Prompt
       .replace('{location}', formData?.location?.label)
@@ -62,13 +68,46 @@ function CreateTrip() {
       .replace('{budget}', formData?.budget)
       .replace('{totalDays}', formData?.noofdays);
 
+
+    const result = await chatSession.sendMessage(FINAL_PROMPT);
+    console.log(result?.response?.text());
+    setLoading(false);
+    SaveAiTrip(result?.response?.text())
+
+  }
+
+
+  const SaveAiTrip = async (TripData) => {
+    setLoading(true);
+  
     try {
-      const result = await chatSession.sendMessage(FINAL_PROMPT);
-      console.log(result?.response?.text());
+      const user = JSON.parse(localStorage.getItem('user'));
+      const docID = Date.now().toString(); // Generate a unique document ID
+      
+      console.log('Saving trip for user:', user?.email);
+      console.log('TripData:', TripData);
+  
+      // Check for large document size
+      const dataSize = JSON.stringify(TripData).length;
+      if (dataSize > 1_000_000) {
+        throw new Error(`TripData exceeds Firestore's size limit of 1 MB (${dataSize} bytes)`);
+      }
+  
+      await setDoc(doc(db, "AITrips", docID), {
+        userSelection: formData,
+        tripData: JSON.parse(TripData), // Parse the JSON string
+        userEmail: user?.email,
+        id: docID,
+      });
+  
+      console.log('Trip saved successfully');
     } catch (error) {
-      console.error("Error generating trip:", error);
+      console.error('Error saving trip:', error.message || error);
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   const GetUserProfile = async (tokenInfo) => {
     try {
@@ -78,7 +117,7 @@ function CreateTrip() {
           Accept: 'Application/json',
         }
       });
-      
+
       console.log(response);
       localStorage.setItem('user', JSON.stringify(response.data));
       setOpenDialog(false); // Close dialog after successful login
@@ -188,8 +227,15 @@ function CreateTrip() {
 
       {/* Generate Button */}
       <div className='my-16 flex justify-end'>
-        <Button className='px-6 py-3 text-lg' onClick={OnGenerateTrip}>
-          Generate Trip
+        <Button className='px-6 py-3 text-lg'
+          disabled={loading}
+
+          onClick={OnGenerateTrip}>
+
+          {loading ?
+            <AiOutlineLoading3Quarters className='h-7 w-7 animate-spin' />
+            : "Generate Trip"
+          }
         </Button>
       </div>
 
@@ -209,10 +255,14 @@ function CreateTrip() {
             <DialogDescription style={{ color: 'white' }}>
               You must be logged in to generate a trip itinerary. Please log in to continue.
               <Button
+                disabled={loading}
                 onClick={login}
                 className="w-full mt-1 flex items-center justify-center">
+
                 <FcGoogle className="mr-2 h-7 w-7" />Sign In
+
               </Button>
+
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
