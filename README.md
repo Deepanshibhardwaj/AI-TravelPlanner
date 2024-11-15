@@ -1,7 +1,7 @@
 
 # AI-TravelPlanner
 
-![image](https://github.com/user-attachments/assets/1382195f-fe8e-4047-8a44-fa866d89e91e)
+![image](https://github.com/user-attachments/assets/a8b2a058-ea83-4f87-ab00-c4a957fd3d07)
 
 Voyage is designed to transform the often complex and time-consuming 
 process of trip planning into a smooth, efficient, and enjoyable experience. By leveraging cuttingedge artificial intelligence, this tool offers a user-friendly solution that provides personalized travel 
