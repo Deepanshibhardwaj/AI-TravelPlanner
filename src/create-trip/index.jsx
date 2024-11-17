@@ -20,12 +20,15 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { setDoc, doc } from 'firebase/firestore';
 
 import { db } from '@/service/firebaseConfig';
+import { useNavigate } from 'react-router-dom';
 
 function CreateTrip() {
   const [place, setPlace] = useState(null);
   const [formData, setFormData] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  const navigate=useNavigate();
 
   const handleInputChange = (name, value) => {
     setFormData((prevFormData) => ({
@@ -93,20 +96,25 @@ function CreateTrip() {
         throw new Error(`TripData exceeds Firestore's size limit of 1 MB (${dataSize} bytes)`);
       }
   
+      // Ensure TripData is an object and not a string.
+      const parsedTripData = JSON.parse(TripData);
+  
       await setDoc(doc(db, "AITrips", docID), {
         userSelection: formData,
-        tripData: JSON.parse(TripData), // Parse the JSON string
+        tripData: parsedTripData, // Now parsing the string into a JSON object
         userEmail: user?.email,
         id: docID,
       });
   
-      console.log('Trip saved successfully');
-    } catch (error) {
-      console.error('Error saving trip:', error.message || error);
-    } finally {
       setLoading(false);
+      navigate('/view-trip/' + docID);
+  
+    } catch (error) {
+      setLoading(false);
+      console.error("Error saving trip:", error);
     }
   };
+  
   
 
   const GetUserProfile = async (tokenInfo) => {
