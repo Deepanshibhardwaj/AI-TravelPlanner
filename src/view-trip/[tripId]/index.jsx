@@ -1,15 +1,15 @@
-import Hotels from '@/components/Hotels';
-import InfoSection from '@/components/InfoSection';
+import InfoSection from './components/InfoSection';
+import Hotels from './components/Hotels';
 import { db } from '@/service/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
-import { Hotel } from 'lucide-react';
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
-function Viewtrip() {
+function ViewTrip() {
   const { tripId } = useParams();
-  const [trip, setTrip] = useState(null); // Set the initial state as null instead of an empty array
+  const [trip, setTrip] = useState(null); // Initial state is null
 
   useEffect(() => {
     if (tripId) {
@@ -18,20 +18,24 @@ function Viewtrip() {
   }, [tripId]);
 
   const GetTripData = async () => {
-    const docRef = doc(db, 'AITrips', tripId);
-    const docSnap = await getDoc(docRef);
+    try {
+      const docRef = doc(db, 'AITrips', tripId);
+      const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      const tripData = docSnap.data();
-      console.log('Document:', tripData);
-      setTrip(tripData); // Update the state with the fetched trip data
-    } else {
-      console.log('No such Document');
-      toast('No trip Found');
+      if (docSnap.exists()) {
+        const fetchedTripData = docSnap.data(); // Use a correctly scoped variable
+        console.log('Fetched trip data from Firestore:', JSON.stringify(fetchedTripData, null, 2)); // Correct variable used
+        setTrip(fetchedTripData); // Update state with fetched data
+      } else {
+        console.log('No such Document');
+        toast('No trip found');
+      }
+    } catch (error) {
+      console.error('Error fetching trip data:', error);
+      toast('Failed to fetch trip data');
     }
   };
 
-  // Check if trip data is still loading
   if (!trip) {
     return <div>Loading...</div>;
   }
@@ -42,13 +46,11 @@ function Viewtrip() {
       <InfoSection trip={trip} />
 
       {/* Recommended Hotels */}
-      <Hotels trip={trip}/>
-
-      {/* Daily Plan */}
+      <Hotels trip={trip} />
 
       {/* Footer */}
     </div>
   );
 }
 
-export default Viewtrip;
+export default ViewTrip;

@@ -97,7 +97,7 @@ function CreateTrip() {
       }
   
       // Ensure TripData is an object and not a string.
-      const parsedTripData = JSON.parse(TripData);
+      const parsedTripData = typeof TripData === 'string' ? JSON.parse(TripData) : TripData;
   
       await setDoc(doc(db, "AITrips", docID), {
         userSelection: formData,

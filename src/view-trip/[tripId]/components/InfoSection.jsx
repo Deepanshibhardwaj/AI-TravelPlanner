@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from './ui/button';
+
 import { LuSendHorizonal } from "react-icons/lu";
 function InfoSection({ trip }) {
 
