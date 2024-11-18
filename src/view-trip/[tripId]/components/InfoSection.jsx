@@ -1,10 +1,32 @@
-import React from 'react';
+import { GetPlaceDetails, PHOTO_REF_URL } from '@/service/GlobalApi';
+import React, { useEffect, useState } from 'react';
 import { LuSendHorizonal } from "react-icons/lu";
 
+
+
+
 function InfoSection({ trip }) {
+
+    const [photoUrl,setPhotoUrl]=useState();
+    
+    useEffect(()=>{
+        trip&&GetPlacePhoto();
+    },[trip])
+
+    const GetPlacePhoto=async()=>{
+
+        const data={
+            textQuery:trip?.userSelection?.location?.label
+        }
+        const result=await GetPlaceDetails(data).then(resp=>{
+            console.log(resp.data.places[0].photos[3].name);
+             const PhotoUrl=PHOTO_REF_URL.replace('{NAME}',resp.data.places[0].photos[3].name);
+             setPhotoUrl(PhotoUrl);
+        })
+    }
     return (
         <div>
-            <img src='/airplane2.jpg' className='h-[340px] w-full object-cover rounded-xl' alt="Airplane" />
+            <img src={photoUrl} className='h-[340px] w-full object-cover rounded-xl' alt="Airplane" />
             <div className='flex justify-between items-center '>
                 <div className='my-5 flex flex-col gap-2'>
                     <h2 className='font-bold text-2xl text-white'>
