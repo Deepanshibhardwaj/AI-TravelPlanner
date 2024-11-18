@@ -8,6 +8,7 @@ import './index.css'; // Correct order of imports
 import { Toaster } from 'sonner';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Viewtrip from './view-trip/[tripId]/index.jsx';
+import MyTrips from './my-trips/index.jsx';
 
 
 // Define the routes
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
   {
     path:'/view-trip/:tripId',
     element:<Viewtrip/>
+  },
+  {
+    path:'/my-trips',
+    element:<MyTrips/>
   }
 ]);
 
