@@ -26,12 +26,12 @@ function InfoSection({ trip }) {
     }
     return (
         <div>
-            <img src={photoUrl} className='h-[340px] w-full object-cover rounded-xl' alt="Airplane" />
+            <img src={photoUrl}  className='h-[400px] w-screen object-cover'  alt="Airplane" />
             <div className='flex justify-between items-center '>
                 <div className='my-5 flex flex-col gap-2'>
                     <h2 className='font-bold text-2xl text-white'>
                         {trip?.userSelection?.location?.label} 
-                        <span className='font-normal text-sm'>   🌥️ 25°C</span>
+                        <span className='font-normal text-sm'>   🌥️ 16°C</span>
                     </h2>
                     <div className='flex gap-5'>
                         <h2 className='p-1 px-3 bg-blue-500 font-bold rounded-full text-white text-xs md:text-md'> 📆 {trip.userSelection?.noofdays} Days</h2>

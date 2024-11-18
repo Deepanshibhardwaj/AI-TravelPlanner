@@ -14,7 +14,7 @@ function HotelCardItem({ hotel }) {
     const GetPlacePhoto = async () => {
         try {
             const data = {
-                textQuery: hotel.name,
+                textQuery: hotel?.name,
             };
             const result = await GetPlaceDetails(data);
             const photoData = result.data.places[0]?.photos?.[3]?.name;
