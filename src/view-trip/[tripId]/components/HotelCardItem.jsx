@@ -34,7 +34,12 @@ function HotelCardItem({ hotel }) {
             rel="noopener noreferrer" // Security best practice for external links
             className="bg-blue-900 p-4 rounded-lg hover:scale-110 transition-all cursor-pointer"
         >
-            <img src={photoUrl || '/fallback-hotel.jpg'} alt="Hotel" className="rounded-xl h-[180px] w-full object-cover" />
+            {/* Updated to use room.jpg as the fallback image */}
+            <img
+                src={photoUrl || '/room.jpg'}
+                alt={hotel.name || 'Hotel'}
+                className="rounded-xl h-[180px] w-full object-cover"
+            />
             <div className="my-2 flex flex-col gap-2">
                 <h2 className="font-medium text-white">{hotel.name || 'Unnamed Hotel'}</h2>
                 <p className="text-xs text-white">{hotel.address || 'Address not available'}</p>

@@ -12,17 +12,29 @@ function PlaceCardItem({ place }) {
         place&&GetPlacePhoto();
     },[place])
 
-    const GetPlacePhoto=async()=>{
-
-        const data={
-            textQuery:place.name
+    const GetPlacePhoto = async () => {
+        try {
+            const data = {
+                textQuery: place.name, // Match the API's expected parameter
+            };
+            const result = await GetPlaceDetails(data);
+    
+            // Safely access the first available photo
+            const photoData = result.data?.places?.[0]?.photos?.[0]?.name;
+    
+            if (photoData) {
+                const PhotoUrl = PHOTO_REF_URL.replace('{NAME}', photoData);
+                setPhotoUrl(PhotoUrl);
+            } else {
+                console.warn("No photo available for this place.");
+                setPhotoUrl("/hotel.jpg"); // Set fallback image
+            }
+        } catch (error) {
+            console.error("Error fetching photo:", error);
+            setPhotoUrl("/hotel.jpg"); // Set fallback image on error
         }
-        const result=await GetPlaceDetails(data).then(resp=>{
-            console.log(resp.data.places[0].photos[3].name);
-             const PhotoUrl=PHOTO_REF_URL.replace('{NAME}',resp.data.places[0].photos[3].name);
-             setPhotoUrl(PhotoUrl);
-        })
-    }
+    };
+    
     return (
         <Link
             to={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name || '')}`}
